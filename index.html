@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Châssis">
@@ -20,10 +20,10 @@
   :root{ --bg:#0b1220; --card:#141b2d; --text:#e8edf6; --muted:#93a1b8; --line:#233047;
     --pill-bg:#1c2740; --pill-text:#c4d0e6; --accent:#3b82f6; }
 }
-*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent; touch-action:manipulation;}
 html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-  height:100%;}
+  height:100%; touch-action:manipulation; -webkit-text-size-adjust:100%; text-size-adjust:100%;}
 body{padding-top:var(--safe-t);}
 input,select,textarea,button{font-family:inherit;font-size:16px;}
 h1,h2,h3{margin:0;}
@@ -314,6 +314,19 @@ textarea.text-input{min-height:64px;resize:vertical;}
 <script>
 (function(){
 "use strict";
+
+/* ---------- Blocage du zoom (pinch + double-tap) sur mobile ---------- */
+document.addEventListener('gesturestart', function(e){ e.preventDefault(); });
+document.addEventListener('gesturechange', function(e){ e.preventDefault(); });
+document.addEventListener('touchmove', function(e){
+  if(e.touches && e.touches.length > 1) e.preventDefault();
+}, { passive:false });
+var lastTouchEnd = 0;
+document.addEventListener('touchend', function(e){
+  var now = Date.now();
+  if(now - lastTouchEnd <= 300) e.preventDefault();
+  lastTouchEnd = now;
+}, { passive:false });
 
 /* ---------- Constantes ---------- */
 var STORAGE_KEY = "chassisMeasurements_v1";
