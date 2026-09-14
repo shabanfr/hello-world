@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Châssis">
+<meta name="theme-color" content="#0f172a">
+<title>Métré Châssis &amp; Fenêtres</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AA%9F%3C/text%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f2f4f7; --card:#ffffff; --text:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  --accent:#2563eb; --accent-ink:#ffffff; --danger:#dc2626; --ok:#16a34a;
+  --pill-bg:#eef2f7; --pill-text:#334155; --pill-active:#2563eb;
+  --radius:14px; --safe-b: env(safe-area-inset-bottom,0px); --safe-t: env(safe-area-inset-top,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#0b1220; --card:#141b2d; --text:#e8edf6; --muted:#93a1b8; --line:#233047;
+    --pill-bg:#1c2740; --pill-text:#c4d0e6; --accent:#3b82f6; }
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  height:100%;}
+body{padding-top:var(--safe-t);}
+input,select,textarea,button{font-family:inherit;font-size:16px;}
+h1,h2,h3{margin:0;}
+button{cursor:pointer;}
+.app{max-width:640px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;}
+
+/* Header */
+.app-header{position:sticky;top:0;z-index:20;background:var(--bg);padding:10px 14px 6px;
+  display:flex;align-items:center;justify-content:space-between;gap:8px;}
+.app-header h1{font-size:19px;letter-spacing:-.2px;display:flex;align-items:center;gap:8px;}
+.app-header .sub{font-size:12px;color:var(--muted);}
+.icon-btn{width:38px;height:38px;border-radius:10px;border:none;background:var(--card);
+  border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;}
+
+main{flex:1;padding:4px 14px 12px;}
+
+/* Sections show/hide */
+[hidden]{display:none!important;}
+
+/* Segmented pills */
+.pillrow{display:flex;flex-wrap:wrap;gap:8px;}
+.pill{border:1px solid var(--line);background:var(--pill-bg);color:var(--pill-text);
+  padding:9px 14px;border-radius:999px;font-size:14px;font-weight:600;white-space:nowrap;
+  min-height:38px;display:inline-flex;align-items:center;gap:6px;}
+.pill.active{background:var(--pill-active);border-color:var(--pill-active);color:#fff;}
+.pillrow.big .pill{flex:1;justify-content:center;padding:12px 10px;font-size:15px;}
+
+/* Fields */
+.field{margin:14px 0;}
+.field > label{display:block;font-size:12.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.04em;color:var(--muted);margin-bottom:7px;}
+.text-input, textarea.text-input{width:100%;padding:12px 13px;border-radius:12px;
+  border:1px solid var(--line);background:var(--card);color:var(--text);}
+textarea.text-input{min-height:64px;resize:vertical;}
+
+.dims-row{display:flex;gap:10px;}
+.dims-row .field{flex:1;margin:14px 0;}
+.stepper{display:flex;align-items:stretch;border:1px solid var(--line);border-radius:12px;
+  overflow:hidden;background:var(--card);}
+.stepper button{width:42px;border:none;background:var(--pill-bg);color:var(--text);
+  font-size:20px;font-weight:700;line-height:1;}
+.stepper button:active{background:var(--accent);color:#fff;}
+.stepper input{border:none;background:transparent;width:100%;text-align:center;
+  font-size:19px;font-weight:700;padding:10px 2px;color:var(--text);}
+.unit{font-size:12px;color:var(--muted);text-align:center;margin-top:4px;}
+
+/* Card / section */
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:14px;margin:12px 0;}
+.card h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);
+  margin-bottom:10px;}
+
+/* Panels editor (combiné) */
+.panel-edit{border:1px dashed var(--line);border-radius:12px;padding:10px;margin-bottom:10px;
+  position:relative;background:var(--bg);}
+.panel-edit .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.panel-edit .ph strong{font-size:13px;}
+.rm-panel{width:30px;height:30px;border-radius:8px;border:none;background:var(--danger);
+  color:#fff;font-size:15px;font-weight:700;}
+.add-panel{width:100%;padding:12px;border-radius:12px;border:1px dashed var(--accent);
+  background:transparent;color:var(--accent);font-weight:700;margin-top:2px;}
+.mini-row{display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;}
+.mini-row .pill{padding:6px 11px;font-size:12.5px;min-height:32px;}
+.mini-num{width:90px;padding:9px 8px;border-radius:9px;border:1px solid var(--line);
+  background:var(--card);color:var(--text);text-align:center;font-weight:700;}
+
+/* Preview */
+.preview-wrap{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:12px 12px 8px;margin:12px 0;}
+.preview-wrap h3{display:flex;justify-content:space-between;align-items:center;}
+.preview-svg-box{width:100%;display:flex;justify-content:center;}
+.preview-svg-box svg{width:100%;height:auto;max-height:280px;}
+.preview-caption{text-align:center;font-size:12.5px;color:var(--muted);margin-top:4px;}
+
+/* Buttons */
+.btn{display:block;width:100%;padding:14px;border-radius:12px;border:none;font-weight:700;
+  font-size:16px;text-align:center;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-secondary{background:var(--pill-bg);color:var(--text);}
+.btn-danger{background:var(--danger);color:#fff;}
+.btn-row{display:flex;gap:10px;margin-top:6px;}
+.btn-row .btn{flex:1;}
+.sticky-actions{position:sticky;bottom:calc(64px + var(--safe-b) + 8px);z-index:10;
+  padding-top:4px;}
+
+/* List */
+.search-row{display:flex;gap:8px;margin:6px 0 12px;}
+.search-row input{flex:1;}
+.item-card{display:flex;gap:10px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:10px;margin-bottom:10px;align-items:center;}
+.item-thumb{width:74px;height:64px;flex:none;display:flex;align-items:center;justify-content:center;
+  background:var(--bg);border-radius:10px;overflow:hidden;}
+.item-thumb svg{width:100%;height:100%;}
+.item-info{flex:1;min-width:0;}
+.item-info .top{display:flex;align-items:center;gap:6px;font-weight:700;font-size:15px;}
+.item-info .top .icon{font-size:15px;}
+.item-info .meta{font-size:12.5px;color:var(--muted);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.item-info .chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.chip{font-size:11px;font-weight:700;background:var(--pill-bg);color:var(--pill-text);
+  padding:3px 8px;border-radius:999px;}
+.item-actions{display:flex;flex-direction:column;gap:6px;}
+.item-actions button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);
+  background:var(--bg);font-size:16px;}
+.item-actions .del{color:var(--danger);}
+.empty-state{text-align:center;color:var(--muted);padding:40px 10px;font-size:14.5px;}
+
+/* Bottom nav */
+.bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);
+  border-top:1px solid var(--line);display:flex;padding:6px 8px calc(6px + var(--safe-b));
+  max-width:640px;margin:0 auto;}
+.bottom-nav button{flex:1;border:none;background:transparent;color:var(--muted);
+  display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 4px;
+  border-radius:10px;font-size:11px;font-weight:700;}
+.bottom-nav button .em{font-size:19px;}
+.bottom-nav button.active{color:var(--accent);}
+.spacer-nav{height:78px;}
+
+/* import hidden input */
+#importFile{display:none;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="app-header">
+    <h1>🪟 Métré Châssis</h1>
+    <button class="icon-btn" id="btnMenu" title="Export / Import">⋯</button>
+  </div>
+
+  <main>
+
+    <!-- ===== FORM VIEW ===== -->
+    <section id="viewForm">
+      <div class="card" style="margin-top:4px;">
+        <h3 id="formTitle">Nouvelle mesure</h3>
+
+        <div class="field">
+          <label>Nom / repère</label>
+          <input class="text-input" id="fNom" placeholder="Ex: Fenêtre côté jardin">
+        </div>
+        <div class="field">
+          <label>Pièce / emplacement</label>
+          <input class="text-input" id="fPiece" placeholder="Ex: Cuisine, Chambre 1...">
+        </div>
+
+        <div class="field">
+          <label>Type d'ouvrage</label>
+          <div class="pillrow big" id="pillType">
+            <button type="button" class="pill" data-val="fenetre">🪟 Fenêtre</button>
+            <button type="button" class="pill" data-val="porte">🚪 Porte</button>
+            <button type="button" class="pill" data-val="combine">🧩 Combiné</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dimensions simples (fenetre / porte) -->
+      <div class="card sec-simple">
+        <h3>Dimensions (mm)</h3>
+        <div class="dims-row">
+          <div class="field">
+            <label>Largeur</label>
+            <div class="stepper">
+              <button type="button" data-step="-w">−</button>
+              <input class="mini-num" style="border:none" id="fLargeur" inputmode="numeric" value="1200">
+              <button type="button" data-step="+w">+</button>
+            </div>
+          </div>
+          <div class="field">
+            <label>Hauteur</label>
+            <div class="stepper">
+              <button type="button" data-step="-h">−</button>
+              <input class="mini-num" style="border:none" id="fHauteur" inputmode="numeric" value="1400">
+              <button type="button" data-step="+h">+</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Fenêtre simple -->
+      <div class="card sec-fenetre">
+        <h3>Ouverture de la fenêtre</h3>
+        <div class="pillrow" id="pillOuverture">
+          <button type="button" class="pill" data-val="fixe">Fixe</button>
+          <button type="button" class="pill" data-val="battant">Battant</button>
+          <button type="button" class="pill" data-val="oscillo-battant">Oscillo-battant</button>
+          <button type="button" class="pill" data-val="coulissant">Coulissant</button>
+          <button type="button" class="pill" data-val="soufflet">Soufflet</button>
+        </div>
+        <div class="field sec-sens" style="margin-bottom:0;">
+          <label>Sens d'ouverture (vu de l'extérieur)</label>
+          <div class="pillrow big" id="pillSens">
+            <button type="button" class="pill" data-val="gauche">⬅ Gauche</button>
+            <button type="button" class="pill" data-val="droite">Droite ➡</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Porte simple -->
+      <div class="card sec-porte">
+        <h3>Sens de la porte</h3>
+        <div class="field">
+          <label>Côté des paumelles (charnières)</label>
+          <div class="pillrow big" id="pillSensPorte">
+            <button type="button" class="pill" data-val="gauche">⬅ Gauche</button>
+            <button type="button" class="pill" data-val="droite">Droite ➡</button>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Ouverture</label>
+          <div class="pillrow big" id="pillSensOuvPorte">
+            <button type="button" class="pill" data-val="interieur">Vers l'intérieur</button>
+            <button type="button" class="pill" data-val="exterieur">Vers l'extérieur</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Combiné -->
+      <div class="card sec-combine">
+        <h3>Composition du châssis combiné</h3>
+        <div id="panelsEditor"></div>
+        <button type="button" class="add-panel" id="btnAddPanel">+ Ajouter un élément</button>
+        <div class="unit" style="margin-top:8px;">Hauteur commune définie ci-dessus. Largeur totale = somme des éléments.</div>
+      </div>
+
+      <!-- Live preview -->
+      <div class="preview-wrap">
+        <h3>Aperçu en direct</h3>
+        <div class="preview-svg-box" id="previewBox"></div>
+        <div class="preview-caption" id="previewCaption"></div>
+      </div>
+
+      <!-- Materiau / vitrage / notes -->
+      <div class="card">
+        <h3>Détails (optionnel)</h3>
+        <div class="field">
+          <label>Matériau</label>
+          <div class="pillrow" id="pillMateriau">
+            <button type="button" class="pill" data-val="PVC">PVC</button>
+            <button type="button" class="pill" data-val="Alu">Alu</button>
+            <button type="button" class="pill" data-val="Bois">Bois</button>
+            <button type="button" class="pill" data-val="Mixte">Bois-Alu</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Vitrage</label>
+          <div class="pillrow" id="pillVitrage">
+            <button type="button" class="pill" data-val="Simple">Simple</button>
+            <button type="button" class="pill" data-val="Double">Double</button>
+            <button type="button" class="pill" data-val="Triple">Triple</button>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0;">
+          <label>Notes</label>
+          <textarea class="text-input" id="fNotes" placeholder="Remarques, contraintes, teinte..."></textarea>
+        </div>
+      </div>
+
+      <div class="sticky-actions">
+        <button class="btn btn-primary" id="btnSave">💾 Enregistrer</button>
+        <div class="btn-row" id="editRow" hidden>
+          <button class="btn btn-secondary" id="btnCancelEdit">Annuler</button>
+        </div>
+      </div>
+      <div style="height:6px;"></div>
+    </section>
+
+    <!-- ===== LIST VIEW ===== -->
+    <section id="viewList" hidden>
+      <div class="search-row" style="margin-top:8px;">
+        <input class="text-input" id="fSearch" placeholder="🔎 Rechercher (nom, pièce)...">
+      </div>
+      <div id="listContainer"></div>
+    </section>
+
+  </main>
+
+  <div class="spacer-nav"></div>
+  <nav class="bottom-nav">
+    <button id="navForm" class="active"><span class="em">➕</span>Nouveau</button>
+    <button id="navList"><span class="em">📋</span><span id="navListLabel">Mesures</span></button>
+    <button id="navExport"><span class="em">📤</span>Exporter</button>
+    <button id="navImport"><span class="em">📥</span>Importer</button>
+  </nav>
+  <input type="file" id="importFile" accept="application/json">
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Constantes ---------- */
+var STORAGE_KEY = "chassisMeasurements_v1";
+var OUVERTURE_LABELS = {fixe:"Fixe",battant:"Battant",'oscillo-battant':"Oscillo-battant",coulissant:"Coulissant",soufflet:"Soufflet"};
+var NEEDS_SENS = {battant:1,'oscillo-battant':1,coulissant:1};
+
+/* ---------- Etat ---------- */
+var items = loadItems();
+var editingId = null;
+var currentPanels = []; // pour type combiné
+var view = "form";
+var state = { type:"fenetre", ouverture:"oscillo-battant", sens:"gauche",
+              sensPorte:"gauche", sensOuvPorte:"interieur", materiau:null, vitrage:null };
+
+/* ---------- Utils ---------- */
+function uid(){ return 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,9); }
+function clamp(n,min,max){ return Math.max(min,Math.min(max,n)); }
+function esc(s){ return (s||"").replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+function loadItems(){
+  try{ var raw = localStorage.getItem(STORAGE_KEY); return raw? JSON.parse(raw) : []; }
+  catch(e){ return []; }
+}
+function saveItems(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(items)); }
+
+/* ---------- Pill helpers ---------- */
+function wirePillRow(rowEl, onPick){
+  rowEl.querySelectorAll('.pill').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      rowEl.querySelectorAll('.pill').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      onPick(btn.getAttribute('data-val'));
+    });
+  });
+}
+function setPillActive(rowEl, val){
+  rowEl.querySelectorAll('.pill').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-val') === val);
+  });
+}
+
+var pillType = document.getElementById('pillType');
+var pillOuverture = document.getElementById('pillOuverture');
+var pillSens = document.getElementById('pillSens');
+var pillSensPorte = document.getElementById('pillSensPorte');
+var pillSensOuvPorte = document.getElementById('pillSensOuvPorte');
+var pillMateriau = document.getElementById('pillMateriau');
+var pillVitrage = document.getElementById('pillVitrage');
+
+wirePillRow(pillType, function(v){ state.type=v; updateSectionsVisibility(); refreshPreview(); });
+wirePillRow(pillOuverture, function(v){ state.ouverture=v; updateSectionsVisibility(); refreshPreview(); });
+wirePillRow(pillSens, function(v){ state.sens=v; refreshPreview(); });
+wirePillRow(pillSensPorte, function(v){ state.sensPorte=v; refreshPreview(); });
+wirePillRow(pillSensOuvPorte, function(v){ state.sensOuvPorte=v; refreshPreview(); });
+wirePillRow(pillMateriau, function(v){ state.materiau = (state.materiau===v)? null : v; setPillActive(pillMateriau,state.materiau); });
+wirePillRow(pillVitrage, function(v){ state.vitrage = (state.vitrage===v)? null : v; setPillActive(pillVitrage,state.vitrage); });
+
+/* allow toggling materiau/vitrage off by clicking twice: intercept after class set */
+[pillMateriau,pillVitrage].forEach(function(row){
+  row.addEventListener('click', function(e){
+    var btn = e.target.closest('.pill'); if(!btn) return;
+    // handled by wirePillRow's onPick using state; re-sync classes
+  });
+});
+
+function updateSectionsVisibility(){
+  document.querySelectorAll('.sec-simple').forEach(function(el){ el.hidden = (state.type==='combine'); });
+  document.querySelectorAll('.sec-fenetre').forEach(function(el){ el.hidden = (state.type!=='fenetre'); });
+  document.querySelectorAll('.sec-porte').forEach(function(el){ el.hidden = (state.type!=='porte'); });
+  document.querySelectorAll('.sec-combine').forEach(function(el){ el.hidden = (state.type!=='combine'); });
+  var sensSec = document.querySelector('.sec-sens');
+  sensSec.hidden = !(state.type==='fenetre' && NEEDS_SENS[state.ouverture]);
+}
+
+/* ---------- Dimensions steppers ---------- */
+var fLargeur = document.getElementById('fLargeur');
+var fHauteur = document.getElementById('fHauteur');
+document.querySelectorAll('[data-step]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var s = btn.getAttribute('data-step');
+    var el = (s.indexOf('w')>-1) ? fLargeur : fHauteur;
+    var delta = (s[0]==='+') ? 10 : -10;
+    el.value = clamp((parseInt(el.value||"0",10)||0) + delta, 100, 6000);
+    refreshPreview();
+  });
+});
+[fLargeur,fHauteur].forEach(function(el){ el.addEventListener('input', refreshPreview); });
+
+/* ---------- Panels editor (combiné) ---------- */
+function newPanel(){ return { id:uid(), largeur:600, type:'fixe', ouverture:'fixe', sens:'gauche', sensPorte:'gauche', sensOuvPorte:'interieur' }; }
+
+document.getElementById('btnAddPanel').addEventListener('click', function(){
+  currentPanels.push(newPanel());
+  renderPanelsEditor();
+  refreshPreview();
+});
+
+function renderPanelsEditor(){
+  var box = document.getElementById('panelsEditor');
+  box.innerHTML = '';
+  currentPanels.forEach(function(p, idx){
+    var div = document.createElement('div');
+    div.className = 'panel-edit';
+    var typePills = ['fixe','fenetre','porte'].map(function(t){
+      var lbl = t==='fixe'?'Fixe':(t==='fenetre'?'Fenêtre':'Porte');
+      return '<button type="button" class="pill'+(p.type===t?' active':'')+'" data-act="ptype" data-t="'+t+'">'+lbl+'</button>';
+    }).join('');
+
+    var extra = '';
+    if(p.type === 'fenetre'){
+      extra += '<div class="mini-row">' + Object.keys(OUVERTURE_LABELS).map(function(o){
+        return '<button type="button" class="pill'+(p.ouverture===o?' active':'')+'" data-act="pouv" data-o="'+o+'">'+OUVERTURE_LABELS[o]+'</button>';
+      }).join('') + '</div>';
+      if(NEEDS_SENS[p.ouverture]){
+        extra += '<div class="mini-row">'+
+          '<button type="button" class="pill'+(p.sens==='gauche'?' active':'')+'" data-act="psens" data-s="gauche">⬅ Gauche</button>'+
+          '<button type="button" class="pill'+(p.sens==='droite'?' active':'')+'" data-act="psens" data-s="droite">Droite ➡</button></div>';
+      }
+    } else if(p.type === 'porte'){
+      extra += '<div class="mini-row">'+
+        '<button type="button" class="pill'+(p.sensPorte==='gauche'?' active':'')+'" data-act="ppsens" data-s="gauche">⬅ Gauche</button>'+
+        '<button type="button" class="pill'+(p.sensPorte==='droite'?' active':'')+'" data-act="ppsens" data-s="droite">Droite ➡</button></div>'+
+        '<div class="mini-row">'+
+        '<button type="button" class="pill'+(p.sensOuvPorte==='interieur'?' active':'')+'" data-act="ppouv" data-s="interieur">Intérieur</button>'+
+        '<button type="button" class="pill'+(p.sensOuvPorte==='exterieur'?' active':'')+'" data-act="ppouv" data-s="exterieur">Extérieur</button></div>';
+    }
+
+    div.innerHTML =
+      '<div class="ph"><strong>Élément '+(idx+1)+'</strong>'+
+        (currentPanels.length>1 ? '<button type="button" class="rm-panel" data-act="rm">✕</button>' : '')+
+      '</div>'+
+      '<div class="mini-row"><label style="font-size:12px;color:var(--muted);width:100%;">Largeur (mm)</label></div>'+
+      '<div class="mini-row"><input type="number" class="mini-num" data-act="pw" value="'+p.largeur+'" style="width:120px;"></div>'+
+      '<div class="mini-row">'+typePills+'</div>'+
+      extra;
+
+    div.querySelectorAll('[data-act]').forEach(function(el){
+      var act = el.getAttribute('data-act');
+      if(act==='rm'){
+        el.addEventListener('click', function(){
+          currentPanels.splice(idx,1); renderPanelsEditor(); refreshPreview();
+        });
+      } else if(act==='ptype'){
+        el.addEventListener('click', function(){ p.type = el.getAttribute('data-t'); renderPanelsEditor(); refreshPreview(); });
+      } else if(act==='pouv'){
+        el.addEventListener('click', function(){ p.ouverture = el.getAttribute('data-o'); renderPanelsEditor(); refreshPreview(); });
+      } else if(act==='psens'){
+        el.addEventListener('click', function(){ p.sens = el.getAttribute('data-s'); renderPanelsEditor(); refreshPreview(); });
+      } else if(act==='ppsens'){
+        el.addEventListener('click', function(){ p.sensPorte = el.getAttribute('data-s'); renderPanelsEditor(); refreshPreview(); });
+      } else if(act==='ppouv'){
+        el.addEventListener('click', function(){ p.sensOuvPorte = el.getAttribute('data-s'); renderPanelsEditor(); refreshPreview(); });
+      } else if(act==='pw'){
+        el.addEventListener('input', function(){ p.largeur = clamp(parseInt(el.value||"0",10)||0, 50, 4000); refreshPreview(); });
+      }
+    });
+
+    box.appendChild(div);
+  });
+}
+
+/* ---------- SVG rendering (live schematic + animation) ---------- */
+var SVG_NS = "http://www.w3.org/2000/svg";
+
+function buildPanelsFromState(){
+  if(state.type === 'combine'){
+    return currentPanels.length ? currentPanels : [newPanel()];
+  }
+  if(state.type === 'porte'){
+    return [{ largeur: parseInt(fLargeur.value||"0",10)||1, type:'porte',
+      sensPorte: state.sensPorte, sensOuvPorte: state.sensOuvPorte }];
+  }
+  return [{ largeur: parseInt(fLargeur.value||"0",10)||1, type:'fenetre',
+    ouverture: state.ouverture, sens: state.sens }];
+}
+
+function panelsFromItem(item){
+  if(item.type === 'combine') return item.panels;
+  if(item.type === 'porte') return [{ largeur:item.largeur, type:'porte', sensPorte:item.sensPorte, sensOuvPorte:item.sensOuvPorte }];
+  return [{ largeur:item.largeur, type:'fenetre', ouverture:item.ouverture, sens:item.sens }];
+}
+
+function generateSVG(panels, hauteur, opts){
+  opts = opts || {};
+  var totalLargeur = panels.reduce(function(s,p){ return s + (p.largeur||1); }, 0) || 1;
+  hauteur = hauteur || 1;
+  var unit = Math.max(totalLargeur, hauteur);
+  var padL = unit*0.20, padB = unit*0.18, padT = unit*0.07, padR = unit*0.07;
+  var vbW = totalLargeur + padL + padR, vbH = hauteur + padT + padB;
+  var vbX = -padL, vbY = -padT;
+
+  var frameSw = unit*0.014, mullionSw = unit*0.012, sashSw = unit*0.007, dimSw = unit*0.004;
+  var fontDim = unit*0.075, fontSmall = unit*0.06;
+  var strokeCol = opts.small ? "#7c8aa8" : "var(--muted-svg,#5b6b85)";
+
+  var svg = '<svg viewBox="'+vbX+' '+vbY+' '+vbW+' '+vbH+'" xmlns="'+SVG_NS+'" preserveAspectRatio="xMidYMid meet">';
+  svg += '<style>.fr{fill:none;stroke:#3b4863;stroke-width:'+frameSw+';}.mu{stroke:#3b4863;stroke-width:'+mullionSw+';}' +
+         '.sash{fill:rgba(37,99,235,0.10);stroke:#2563eb;stroke-width:'+sashSw+';}' +
+         '.fixe-fill{fill:rgba(100,116,139,0.10);stroke:#64748b;stroke-width:'+sashSw+';}' +
+         '.sym{stroke:#2563eb;stroke-width:'+(sashSw*0.85)+';fill:none;}' +
+         '.dim{stroke:#94a3b8;stroke-width:'+dimSw+';}' +
+         '.dimtxt{fill:#64748b;font-size:'+fontDim+'px;font-weight:700;font-family:-apple-system,sans-serif;}' +
+         '.lbl{fill:#2563eb;font-size:'+fontSmall+'px;font-weight:700;font-family:-apple-system,sans-serif;text-anchor:middle;}' +
+         '.handle{fill:#1e293b;}</style>';
+
+  // Outer frame
+  svg += '<rect class="fr" x="0" y="0" width="'+totalLargeur+'" height="'+hauteur+'" rx="'+(unit*0.01)+'"/>';
+
+  var x = 0;
+  panels.forEach(function(p, idx){
+    var w = p.largeur || 1;
+    var inset = Math.min(w, hauteur) * 0.13;
+    var sx0 = x + inset, sx1 = x + w - inset, sy0 = inset, sy1 = hauteur - inset;
+    var cx = (sx0+sx1)/2, cy = (sy0+sy1)/2;
+
+    if(idx > 0){ svg += '<line class="mu" x1="'+x+'" y1="0" x2="'+x+'" y2="'+hauteur+'"/>'; }
+
+    if(p.type === 'fixe' || (p.type==='fenetre' && p.ouverture==='fixe')){
+      svg += '<rect class="fixe-fill" x="'+sx0+'" y="'+sy0+'" width="'+(sx1-sx0)+'" height="'+(sy1-sy0)+'"/>';
+      svg += '<line class="sym" opacity="0.35" x1="'+sx0+'" y1="'+sy0+'" x2="'+sx1+'" y2="'+sy1+'"/>';
+      svg += '<line class="sym" opacity="0.35" x1="'+sx1+'" y1="'+sy0+'" x2="'+sx0+'" y2="'+sy1+'"/>';
+    }
+    else if(p.type === 'fenetre' && (p.ouverture==='battant' || p.ouverture==='oscillo-battant')){
+      var hingeGauche = p.sens === 'gauche';
+      var hingeX = hingeGauche ? sx0 : sx1;
+      var oppX = hingeGauche ? sx1 : sx0;
+      // static turn symbol (triangle apex at hinge)
+      svg += '<polyline class="sym" points="'+oppX+','+sy0+' '+hingeX+','+cy+' '+oppX+','+sy1+'"/>';
+      if(p.ouverture === 'oscillo-battant'){
+        svg += '<polyline class="sym" opacity="0.55" points="'+sx0+','+sy0+' '+cx+','+sy1+' '+sx1+','+sy0+'"/>';
+      }
+      // animated sash (scale from hinge side) via SMIL
+      svg += '<g transform="translate('+hingeX+',0)">'+
+               '<g>'+
+                 '<animateTransform attributeName="transform" type="scale" values="1,1;0.18,1;1,1" dur="3.2s" repeatCount="indefinite"/>'+
+                 '<rect class="sash" x="'+(sx0-hingeX)+'" y="'+sy0+'" width="'+(sx1-sx0)+'" height="'+(sy1-sy0)+'"/>'+
+               '</g></g>';
+      svg += '<circle class="handle" cx="'+(oppX + (hingeGauche? -inset*0.5 : inset*0.5))+'" cy="'+cy+'" r="'+(unit*0.012)+'"/>';
+    }
+    else if(p.type === 'fenetre' && p.ouverture === 'soufflet'){
+      svg += '<polyline class="sym" points="'+sx0+','+sy0+' '+cx+','+sy1+' '+sx1+','+sy0+'"/>';
+      svg += '<g transform="translate(0,'+sy1+')">'+
+               '<g>'+
+                 '<animateTransform attributeName="transform" type="scale" values="1,1;1,0.2;1,1" dur="3.2s" repeatCount="indefinite"/>'+
+                 '<rect class="sash" x="'+sx0+'" y="'+(sy0-sy1)+'" width="'+(sx1-sx0)+'" height="'+(sy1-sy0)+'"/>'+
+               '</g></g>';
+    }
+    else if(p.type === 'fenetre' && p.ouverture === 'coulissant'){
+      var dir = (p.sens === 'droite') ? 1 : -1;
+      var slide = (sx1-sx0) * 0.22 * dir;
+      svg += '<rect class="fixe-fill" x="'+sx0+'" y="'+sy0+'" width="'+(sx1-sx0)+'" height="'+(sy1-sy0)+'"/>';
+      svg += '<g><animateTransform attributeName="transform" type="translate" values="0,0;'+slide+',0;0,0" dur="3.4s" repeatCount="indefinite"/>'+
+             '<rect class="sash" x="'+(sx0+(sx1-sx0)*0.05)+'" y="'+(sy0+(sy1-sy0)*0.08)+'" width="'+((sx1-sx0)*0.55)+'" height="'+((sy1-sy0)*0.84)+'"/></g>';
+      var ax = cx - dir*(sx1-sx0)*0.16, ax2 = cx + dir*(sx1-sx0)*0.16;
+      svg += '<line class="sym" x1="'+ax+'" y1="'+(sy1-inset*0.4)+'" x2="'+ax2+'" y2="'+(sy1-inset*0.4)+'"/>';
+      svg += '<polyline class="sym" points="'+(ax2 - dir*unit*0.03)+','+(sy1-inset*0.4-unit*0.03)+' '+ax2+','+(sy1-inset*0.4)+' '+(ax2 - dir*unit*0.03)+','+(sy1-inset*0.4+unit*0.03)+'"/>';
+    }
+    else if(p.type === 'porte'){
+      var hgL = p.sensPorte === 'gauche';
+      var hX = hgL ? sx0 : sx1;
+      var opX = hgL ? sx1 : sx0;
+      var sweepFlag = hgL ? 1 : 0;
+      svg += '<path class="sym" opacity="0.5" stroke-dasharray="'+(unit*0.015)+' '+(unit*0.012)+'" d="M '+opX+' '+sy0+' A '+(sx1-sx0)+' '+(sx1-sx0)+' 0 0 '+sweepFlag+' '+hX+' '+(sy0+(sx1-sx0))+'"/>';
+      svg += '<g transform="translate('+hX+',0)">'+
+               '<g>'+
+                 '<animateTransform attributeName="transform" type="scale" values="1,1;0.16,1;1,1" dur="3s" repeatCount="indefinite"/>'+
+                 '<rect class="sash" x="'+(sx0-hX)+'" y="'+sy0+'" width="'+(sx1-sx0)+'" height="'+(sy1-sy0)+'"/>'+
+               '</g></g>';
+      svg += '<circle class="handle" cx="'+(opX + (hgL? -inset*0.5 : inset*0.5))+'" cy="'+cy+'" r="'+(unit*0.014)+'"/>';
+    }
+
+    if(w >= totalLargeur*0.18){
+      svg += '<text class="lbl" x="'+cx+'" y="'+(sy0 - unit*0.02)+'">'+Math.round(w)+'</text>';
+    }
+    x += w;
+  });
+
+  if(!opts.small){
+    // width dimension
+    var dy = hauteur + padB*0.35;
+    svg += '<line class="dim" x1="0" y1="'+dy+'" x2="'+totalLargeur+'" y2="'+dy+'"/>';
+    svg += '<line class="dim" x1="0" y1="'+(dy-unit*0.02)+'" x2="0" y2="'+(dy+unit*0.02)+'"/>';
+    svg += '<line class="dim" x1="'+totalLargeur+'" y1="'+(dy-unit*0.02)+'" x2="'+totalLargeur+'" y2="'+(dy+unit*0.02)+'"/>';
+    svg += '<text class="dimtxt" x="'+(totalLargeur/2)+'" y="'+(dy+padB*0.42)+'" text-anchor="middle">'+Math.round(totalLargeur)+' mm</text>';
+    // height dimension
+    var dx = -padL*0.35;
+    svg += '<line class="dim" x1="'+dx+'" y1="0" x2="'+dx+'" y2="'+hauteur+'"/>';
+    svg += '<line class="dim" x1="'+(dx-unit*0.02)+'" y1="0" x2="'+(dx+unit*0.02)+'" y2="0"/>';
+    svg += '<line class="dim" x1="'+(dx-unit*0.02)+'" y1="'+hauteur+'" x2="'+(dx+unit*0.02)+'" y2="'+hauteur+'"/>';
+    svg += '<text class="dimtxt" x="0" y="0" transform="translate('+(dx-padL*0.30)+','+(hauteur/2)+') rotate(-90)" text-anchor="middle">'+Math.round(hauteur)+' mm</text>';
+  }
+
+  svg += '</svg>';
+  return svg;
+}
+
+function refreshPreview(){
+  var panels = buildPanelsFromState();
+  var hauteur = parseInt(fHauteur.value||"0",10) || 1;
+  document.getElementById('previewBox').innerHTML = generateSVG(panels, hauteur, {});
+  var total = panels.reduce(function(s,p){ return s+(p.largeur||0); },0);
+  var typeLbl = state.type==='fenetre' ? 'Fenêtre' : (state.type==='porte' ? 'Porte' : 'Châssis combiné ('+panels.length+' élément(s))');
+  document.getElementById('previewCaption').textContent = typeLbl + ' — ' + total + ' × ' + hauteur + ' mm';
+}
+
+/* ---------- Formulaire : reset / load / save ---------- */
+function resetForm(){
+  editingId = null;
+  document.getElementById('formTitle').textContent = 'Nouvelle mesure';
+  document.getElementById('editRow').hidden = true;
+  document.getElementById('fNom').value = '';
+  document.getElementById('fPiece').value = '';
+  document.getElementById('fNotes').value = '';
+  fLargeur.value = 1200; fHauteur.value = 1400;
+  state = { type:"fenetre", ouverture:"oscillo-battant", sens:"gauche",
+            sensPorte:"gauche", sensOuvPorte:"interieur", materiau:null, vitrage:null };
+  currentPanels = [ newPanel() ];
+  setPillActive(pillType,'fenetre'); setPillActive(pillOuverture,'oscillo-battant');
+  setPillActive(pillSens,'gauche'); setPillActive(pillSensPorte,'gauche');
+  setPillActive(pillSensOuvPorte,'interieur'); setPillActive(pillMateriau,null); setPillActive(pillVitrage,null);
+  renderPanelsEditor();
+  updateSectionsVisibility();
+  refreshPreview();
+}
+
+function loadItemIntoForm(item){
+  editingId = item.id;
+  document.getElementById('formTitle').textContent = 'Modifier la mesure';
+  document.getElementById('editRow').hidden = false;
+  document.getElementById('fNom').value = item.nom || '';
+  document.getElementById('fPiece').value = item.piece || '';
+  document.getElementById('fNotes').value = item.notes || '';
+  fLargeur.value = item.largeur || 1200;
+  fHauteur.value = item.hauteur || 1400;
+  state.type = item.type;
+  state.ouverture = item.ouverture || 'fixe';
+  state.sens = item.sens || 'gauche';
+  state.sensPorte = item.sensPorte || 'gauche';
+  state.sensOuvPorte = item.sensOuvPorte || 'interieur';
+  state.materiau = item.materiau || null;
+  state.vitrage = item.vitrage || null;
+  currentPanels = (item.panels || [newPanel()]).map(function(p){ return Object.assign({},p,{id:p.id||uid()}); });
+  setPillActive(pillType, state.type);
+  setPillActive(pillOuverture, state.ouverture);
+  setPillActive(pillSens, state.sens);
+  setPillActive(pillSensPorte, state.sensPorte);
+  setPillActive(pillSensOuvPorte, state.sensOuvPorte);
+  setPillActive(pillMateriau, state.materiau);
+  setPillActive(pillVitrage, state.vitrage);
+  renderPanelsEditor();
+  updateSectionsVisibility();
+  refreshPreview();
+  showView('form');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('btnSave').addEventListener('click', function(){
+  var nom = document.getElementById('fNom').value.trim();
+  if(!nom){ alert('Merci de donner un nom / repère à cette mesure.'); document.getElementById('fNom').focus(); return; }
+  var largeur = parseInt(fLargeur.value||"0",10)||0;
+  var hauteur = parseInt(fHauteur.value||"0",10)||0;
+
+  var item = {
+    id: editingId || uid(),
+    createdAt: editingId ? (items.find(function(i){return i.id===editingId;})||{}).createdAt || Date.now() : Date.now(),
+    updatedAt: Date.now(),
+    nom: nom,
+    piece: document.getElementById('fPiece').value.trim(),
+    type: state.type,
+    notes: document.getElementById('fNotes').value.trim(),
+    materiau: state.materiau, vitrage: state.vitrage
+  };
+
+  if(state.type === 'combine'){
+    item.panels = currentPanels.map(function(p){ return Object.assign({},p); });
+    item.largeur = item.panels.reduce(function(s,p){return s+(p.largeur||0);},0);
+    item.hauteur = hauteur;
+  } else if(state.type === 'porte'){
+    item.largeur = largeur; item.hauteur = hauteur;
+    item.sensPorte = state.sensPorte; item.sensOuvPorte = state.sensOuvPorte;
+  } else {
+    item.largeur = largeur; item.hauteur = hauteur;
+    item.ouverture = state.ouverture;
+    if(NEEDS_SENS[state.ouverture]) item.sens = state.sens;
+  }
+
+  if(editingId){
+    var idx = items.findIndex(function(i){ return i.id === editingId; });
+    if(idx > -1) items[idx] = item;
+  } else {
+    items.unshift(item);
+  }
+  saveItems();
+  resetForm();
+  renderList();
+  showView('list');
+});
+
+document.getElementById('btnCancelEdit').addEventListener('click', resetForm);
+
+/* ---------- Liste ---------- */
+function itemDims(item){
+  return (item.largeur||0) + ' × ' + (item.hauteur||0) + ' mm';
+}
+function itemChips(item){
+  var chips = [];
+  if(item.type === 'fenetre'){
+    chips.push(OUVERTURE_LABELS[item.ouverture] || item.ouverture);
+    if(item.sens) chips.push(item.sens === 'gauche' ? '⬅ Gauche' : 'Droite ➡');
+  } else if(item.type === 'porte'){
+    chips.push(item.sensPorte === 'gauche' ? '⬅ Gauche' : 'Droite ➡');
+    chips.push(item.sensOuvPorte === 'interieur' ? 'Intérieur' : 'Extérieur');
+  } else if(item.type === 'combine'){
+    chips.push((item.panels||[]).length + ' éléments');
+  }
+  if(item.materiau) chips.push(item.materiau);
+  if(item.vitrage) chips.push(item.vitrage);
+  return chips;
+}
+var TYPE_ICON = { fenetre:'🪟', porte:'🚪', combine:'🧩' };
+
+function renderList(){
+  var q = (document.getElementById('fSearch').value || '').toLowerCase().trim();
+  var container = document.getElementById('listContainer');
+  var filtered = items.filter(function(it){
+    if(!q) return true;
+    return (it.nom||'').toLowerCase().indexOf(q) > -1 || (it.piece||'').toLowerCase().indexOf(q) > -1;
+  });
+  document.getElementById('navListLabel').textContent = 'Mesures (' + items.length + ')';
+
+  if(!filtered.length){
+    container.innerHTML = '<div class="empty-state">'+(items.length? 'Aucun résultat pour cette recherche.' : 'Aucune mesure enregistrée pour le moment.<br>Touchez « Nouveau » pour commencer.')+'</div>';
+    return;
+  }
+
+  container.innerHTML = filtered.map(function(item){
+    var panels = panelsFromItem(item);
+    var svg = generateSVG(panels, item.hauteur, {small:true});
+    var chips = itemChips(item).map(function(c){ return '<span class="chip">'+esc(c)+'</span>'; }).join('');
+    return '<div class="item-card" data-id="'+item.id+'">'+
+      '<div class="item-thumb">'+svg+'</div>'+
+      '<div class="item-info">'+
+        '<div class="top"><span class="icon">'+TYPE_ICON[item.type]+'</span>'+esc(item.nom)+'</div>'+
+        '<div class="meta">'+(item.piece? esc(item.piece)+' · ':'')+itemDims(item)+'</div>'+
+        '<div class="chips">'+chips+'</div>'+
+      '</div>'+
+      '<div class="item-actions">'+
+        '<button class="edit" data-act="edit">✏️</button>'+
+        '<button class="del" data-act="del">🗑</button>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+
+  container.querySelectorAll('.item-card').forEach(function(card){
+    var id = card.getAttribute('data-id');
+    card.querySelector('[data-act="edit"]').addEventListener('click', function(e){
+      e.stopPropagation();
+      var item = items.find(function(i){ return i.id === id; });
+      if(item) loadItemIntoForm(item);
+    });
+    card.querySelector('[data-act="del"]').addEventListener('click', function(e){
+      e.stopPropagation();
+      var item = items.find(function(i){ return i.id === id; });
+      if(item && confirm('Supprimer « '+item.nom+' » ?')){
+        items = items.filter(function(i){ return i.id !== id; });
+        saveItems();
+        renderList();
+      }
+    });
+    card.addEventListener('click', function(){
+      var item = items.find(function(i){ return i.id === id; });
+      if(item) loadItemIntoForm(item);
+    });
+  });
+}
+document.getElementById('fSearch').addEventListener('input', renderList);
+
+/* ---------- Navigation ---------- */
+function showView(v){
+  view = v;
+  document.getElementById('viewForm').hidden = (v !== 'form');
+  document.getElementById('viewList').hidden = (v !== 'list');
+  document.getElementById('navForm').classList.toggle('active', v==='form');
+  document.getElementById('navList').classList.toggle('active', v==='list');
+  if(v==='list') renderList();
+  window.scrollTo({top:0});
+}
+document.getElementById('navForm').addEventListener('click', function(){ showView('form'); });
+document.getElementById('navList').addEventListener('click', function(){ showView('list'); });
+
+/* ---------- Export / Import ---------- */
+document.getElementById('navExport').addEventListener('click', function(){
+  if(!items.length){ alert('Aucune mesure à exporter pour le moment.'); return; }
+  var blob = new Blob([JSON.stringify(items, null, 2)], {type:'application/json'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  var d = new Date(); var stamp = d.toISOString().slice(0,10);
+  a.href = url; a.download = 'mesures-chassis-' + stamp + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(function(){ URL.revokeObjectURL(url); }, 2000);
+});
+document.getElementById('navImport').addEventListener('click', function(){
+  document.getElementById('importFile').click();
+});
+document.getElementById('importFile').addEventListener('change', function(e){
+  var file = e.target.files && e.target.files[0];
+  if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(){
+    try{
+      var data = JSON.parse(reader.result);
+      if(!Array.isArray(data)) throw new Error('format');
+      var replace = confirm(data.length + ' mesure(s) trouvée(s) dans le fichier.\n\nOK = remplacer toute la liste actuelle\nAnnuler = ajouter à la liste existante');
+      var incoming = data.map(function(it){ return Object.assign({}, it, { id: uid() }); });
+      items = replace ? incoming : items.concat(incoming);
+      saveItems();
+      renderList();
+      showView('list');
+    }catch(err){
+      alert("Fichier invalide : impossible de lire ce JSON.");
+    }
+    document.getElementById('importFile').value = '';
+  };
+  reader.readAsText(file);
+});
+
+document.getElementById('btnMenu').addEventListener('click', function(){
+  showView('list');
+});
+
+/* ---------- Init ---------- */
+resetForm();
+renderList();
+showView('form');
+
+})();
+</script>
+</body>
+</html>
